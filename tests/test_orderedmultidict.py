@@ -936,3 +936,177 @@ def _rremove(lst, item):
         lst.pop(pos)
         return lst
     raise ValueError('_rremove(list, x): x not in list')
+
+
+class TestNewMethods(unittest.TestCase):
+
+    def test_removeindex(self):
+        """Test removeindex method."""
+        # Basic functionality
+        omd = omdict([(1, 'a'), (1, 'b'), (1, 'c'), (2, 'd')])
+        omd.removeindex(1, 1)  # Remove middle value
+        self.assertEqual(omd.allitems(), [(1, 'a'), (1, 'c'), (2, 'd')])
+        
+        # Test negative index
+        omd = omdict([(1, 'a'), (1, 'b'), (1, 'c'), (2, 'd')])
+        omd.removeindex(1, -1)  # Remove last value for key 1
+        self.assertEqual(omd.allitems(), [(1, 'a'), (1, 'b'), (2, 'd')])
+        
+        # Test removing first index
+        omd = omdict([(1, 'a'), (1, 'b'), (1, 'c'), (2, 'd')])
+        omd.removeindex(1, 0)
+        self.assertEqual(omd.allitems(), [(1, 'b'), (1, 'c'), (2, 'd')])
+        
+        # Test removing last value for a key (key should be removed)
+        omd = omdict([(1, 'a'), (2, 'd')])
+        omd.removeindex(1, 0)
+        self.assertEqual(omd.allitems(), [(2, 'd')])
+        self.assertNotIn(1, omd)
+        
+        # Test method chaining
+        omd = omdict([(1, 'a'), (1, 'b'), (1, 'c')])
+        result = omd.removeindex(1, 1)
+        self.assertIs(result, omd)  # Should return self
+        
+        # Test all other accessors still work
+        omd = omdict([(1, 'a'), (1, 'b'), (1, 'c'), (2, 'd')])
+        omd.removeindex(1, 1)
+        self.assertEqual(omd.getlist(1), ['a', 'c'])
+        self.assertEqual(omd[1], 'a')
+        self.assertEqual(omd.size(), 3)
+        self.assertEqual(len(omd), 2)
+        
+    def test_removeindex_errors(self):
+        """Test removeindex error cases."""
+        omd = omdict([(1, 'a'), (2, 'd')])
+        
+        # KeyError for non-existent key
+        with self.assertRaises(KeyError):
+            omd.removeindex(99, 0)
+            
+        # IndexError for out of bounds
+        with self.assertRaises(IndexError):
+            omd.removeindex(1, 1)  # Only index 0 exists
+            
+        # IndexError for negative out of bounds
+        with self.assertRaises(IndexError):
+            omd.removeindex(1, -2)  # Only index 0 exists
+            
+        # Empty omdict
+        omd = omdict()
+        with self.assertRaises(KeyError):
+            omd.removeindex(1, 0)
+            
+    def test_replaceindex(self):
+        """Test replaceindex method."""
+        # Basic functionality
+        omd = omdict([(1, 'a'), (1, 'b'), (1, 'c'), (2, 'd')])
+        omd.replaceindex(1, 1, 'NEW')
+        self.assertEqual(omd.allitems(), [(1, 'a'), (1, 'NEW'), (1, 'c'), (2, 'd')])
+        
+        # Test negative index
+        omd = omdict([(1, 'a'), (1, 'b'), (1, 'c'), (2, 'd')])
+        omd.replaceindex(1, -1, 'LAST')  # Replace last value for key 1
+        self.assertEqual(omd.allitems(), [(1, 'a'), (1, 'b'), (1, 'LAST'), (2, 'd')])
+        
+        # Test replacing first index
+        omd = omdict([(1, 'a'), (1, 'b'), (1, 'c'), (2, 'd')])
+        omd.replaceindex(1, 0, 'FIRST')
+        self.assertEqual(omd.allitems(), [(1, 'FIRST'), (1, 'b'), (1, 'c'), (2, 'd')])
+        
+        # Test replacing single value
+        omd = omdict([(1, 'a'), (2, 'd')])
+        omd.replaceindex(1, 0, 'SINGLE')
+        self.assertEqual(omd.allitems(), [(1, 'SINGLE'), (2, 'd')])
+        
+        # Test method chaining
+        omd = omdict([(1, 'a'), (1, 'b'), (1, 'c')])
+        result = omd.replaceindex(1, 1, 'NEW')
+        self.assertIs(result, omd)  # Should return self
+        
+        # Test that other accessors still work
+        omd = omdict([(1, 'a'), (1, 'b'), (1, 'c'), (2, 'd')])
+        omd.replaceindex(1, 1, 'NEW')
+        self.assertEqual(omd.getlist(1), ['a', 'NEW', 'c'])
+        self.assertEqual(omd[1], 'a')  # First value unchanged
+        self.assertEqual(omd.get(1), 'a')
+        self.assertEqual(omd.size(), 4)
+        self.assertEqual(len(omd), 2)
+        
+    def test_replaceindex_errors(self):
+        """Test replaceindex error cases."""
+        omd = omdict([(1, 'a'), (2, 'd')])
+        
+        # KeyError for non-existent key
+        with self.assertRaises(KeyError):
+            omd.replaceindex(99, 0, 'NEW')
+            
+        # IndexError for out of bounds
+        with self.assertRaises(IndexError):
+            omd.replaceindex(1, 1, 'NEW')  # Only index 0 exists
+            
+        # IndexError for negative out of bounds
+        with self.assertRaises(IndexError):
+            omd.replaceindex(1, -2, 'NEW')  # Only index 0 exists
+            
+        # Empty omdict
+        omd = omdict()
+        with self.assertRaises(KeyError):
+            omd.replaceindex(1, 0, 'NEW')
+            
+    def test_mixed_operations(self):
+        """Test mixing removeindex and replaceindex with other operations."""
+        omd = omdict([(1, 'a'), (1, 'b'), (1, 'c'), (2, 'd'), (2, 'e')])
+        
+        # Make changes
+        omd.removeindex(1, 1)  # Remove 'b'
+        omd.replaceindex(2, 0, 'D')  # Replace 'd' with 'D'
+        
+        # Test all accessor methods still work
+        self.assertEqual(omd.allitems(), [(1, 'a'), (1, 'c'), (2, 'D'), (2, 'e')])
+        self.assertEqual(omd.getlist(1), ['a', 'c'])
+        self.assertEqual(omd.getlist(2), ['D', 'e'])
+        self.assertEqual(omd[1], 'a')
+        self.assertEqual(omd[2], 'D')
+        self.assertEqual(list(omd.keys()), [1, 2])
+        self.assertEqual(list(omd.values()), ['a', 'D'])
+        self.assertEqual(list(omd.items()), [(1, 'a'), (2, 'D')])
+        self.assertEqual(omd.size(), 4)
+        self.assertEqual(len(omd), 2)
+        
+        # Test chaining
+        result = omd.removeindex(1, 0).replaceindex(2, 1, 'CHAIN')
+        self.assertIs(result, omd)  # Should return self
+        self.assertEqual(omd.allitems(), [(1, 'c'), (2, 'D'), (2, 'CHAIN')])
+        
+    def test_various_data_types(self):
+        """Test with various data types."""
+        omd = omdict([(1, 'str'), (1, 42), (1, [1, 2, 3]), (1, {'a': 1}), (1, None)])
+        
+        omd.replaceindex(1, 2, 'replaced_list')
+        self.assertEqual(omd.getlist(1), ['str', 42, 'replaced_list', {'a': 1}, None])
+        
+        omd.removeindex(1, -1)  # Remove None
+        self.assertEqual(omd.getlist(1), ['str', 42, 'replaced_list', {'a': 1}])
+        
+        omd.removeindex(1, -1)  # Remove dict
+        self.assertEqual(omd.getlist(1), ['str', 42, 'replaced_list'])
+        
+    def test_edge_cases(self):
+        """Test edge cases."""
+        # Single item operations
+        omd = omdict([(1, 'only')])
+        omd.replaceindex(1, 0, 'replaced')
+        self.assertEqual(omd.allitems(), [(1, 'replaced')])
+        
+        omd.removeindex(1, 0)
+        self.assertEqual(omd.allitems(), [])
+        self.assertNotIn(1, omd)
+        
+        # Test with duplicate values
+        omd = omdict([(1, 'x'), (1, 'x'), (1, 'y')])
+        omd.removeindex(1, 0)  # Remove first 'x'
+        self.assertEqual(omd.getlist(1), ['x', 'y'])
+        
+        omd.replaceindex(1, 0, 'z')  # Replace second 'x' with 'z'
+        self.assertEqual(omd.getlist(1), ['z', 'y'])

@@ -139,6 +139,7 @@ class omdict(MutableMapping):
       load(), size(), reverse(),
       getlist(), add(), addlist(), set(), setlist(), setdefaultlist(),
       poplist(), popvalue(), popvalues(), popitem(), poplistitem(),
+      removeindex(), replaceindex(), removevalues(),
       allitems(), allkeys(), allvalues(), lists(), listitems(),
       iterallitems(), iterallkeys(), iterallvalues(), iterlists(),
         iterlistitems()
@@ -414,6 +415,98 @@ class omdict(MutableMapping):
         Returns: <self>.
         """
         self.setlist(key, [v for v in self.getlist(key) if v not in values])
+        return self
+
+    def removeindex(self, key, index):
+        """
+        Remove the value at the specified index from the list of values for <key>.
+        If <key> has no remaining values after removeindex(), the key is removed
+        from the dictionary.
+
+        Example:
+          omd = omdict([(1, 1), (1, 11), (1, 111), (2, 2)])
+          omd.removeindex(1, 1)  # Remove the second value (11) for key 1
+          omd.allitems() == [(1, 1), (1, 111), (2, 2)]
+          omd.removeindex(1, -1) # Remove the last value (111) for key 1
+          omd.allitems() == [(1, 1), (2, 2)]
+
+        Params:
+          key: The key whose value at the specified index should be removed.
+          index: The index of the value to remove. Supports negative indices.
+
+        Raises:
+          KeyError if <key> isn't in the dictionary.
+          IndexError if <index> is out of bounds for the list of values for <key>.
+
+        Returns: <self>.
+        """
+        if key not in self._map:
+            raise KeyError(key)
+        
+        values = self._map[key]
+        if not values:
+            raise KeyError(key)
+        
+        # Handle negative indices
+        if index < 0:
+            index = len(values) + index
+        
+        # Check bounds
+        if index < 0 or index >= len(values):
+            raise IndexError("list index out of range")
+        
+        # Remove the node at the specified index
+        node = values.pop(index)
+        self._items.removenode(node)
+        
+        # If no more values for this key, remove the key entirely
+        if not values:
+            del self._map[key]
+        
+        return self
+
+    def replaceindex(self, key, index, new_value):
+        """
+        Replace the value at the specified index in the list of values for <key>
+        with <new_value>.
+
+        Example:
+          omd = omdict([(1, 1), (1, 11), (1, 111), (2, 2)])
+          omd.replaceindex(1, 1, 'new')  # Replace the second value for key 1
+          omd.allitems() == [(1, 1), (1, 'new'), (1, 111), (2, 2)]
+          omd.replaceindex(1, -1, 'last') # Replace the last value for key 1
+          omd.allitems() == [(1, 1), (1, 'new'), (1, 'last'), (2, 2)]
+
+        Params:
+          key: The key whose value at the specified index should be replaced.
+          index: The index of the value to replace. Supports negative indices.
+          new_value: The new value to replace the existing value with.
+
+        Raises:
+          KeyError if <key> isn't in the dictionary.
+          IndexError if <index> is out of bounds for the list of values for <key>.
+
+        Returns: <self>.
+        """
+        if key not in self._map:
+            raise KeyError(key)
+        
+        values = self._map[key]
+        if not values:
+            raise KeyError(key)
+        
+        # Handle negative indices
+        if index < 0:
+            index = len(values) + index
+        
+        # Check bounds
+        if index < 0 or index >= len(values):
+            raise IndexError("list index out of range")
+        
+        # Replace the value in the node at the specified index
+        node = values[index]
+        node.value = new_value
+        
         return self
 
     def pop(self, key, default=_absent):
