@@ -981,21 +981,33 @@ class TestNewMethods(unittest.TestCase):
         omd = omdict([(1, 'a'), (2, 'd')])
         
         # KeyError for non-existent key
-        with self.assertRaises(KeyError):
+        with self.assertRaises(KeyError) as cm:
             omd.removeindex(99, 0)
+        self.assertIn('99', str(cm.exception))
+        self.assertIn('removeindex', str(cm.exception))
+        self.assertIn('not found', str(cm.exception))
             
         # IndexError for out of bounds
-        with self.assertRaises(IndexError):
+        with self.assertRaises(IndexError) as cm:
             omd.removeindex(1, 1)  # Only index 0 exists
+        self.assertIn('1', str(cm.exception))  # Index value
+        self.assertIn('removeindex', str(cm.exception))
+        self.assertIn('out of range', str(cm.exception))
             
         # IndexError for negative out of bounds
-        with self.assertRaises(IndexError):
+        with self.assertRaises(IndexError) as cm:
             omd.removeindex(1, -2)  # Only index 0 exists
+        self.assertIn('-2', str(cm.exception))  # Original negative index
+        self.assertIn('removeindex', str(cm.exception))
+        self.assertIn('out of range', str(cm.exception))
             
         # Empty omdict
         omd = omdict()
-        with self.assertRaises(KeyError):
+        with self.assertRaises(KeyError) as cm:
             omd.removeindex(1, 0)
+        self.assertIn('1', str(cm.exception))
+        self.assertIn('removeindex', str(cm.exception))
+        self.assertIn('not found', str(cm.exception))
             
     def test_replaceindex(self):
         """Test replaceindex method."""
@@ -1038,21 +1050,33 @@ class TestNewMethods(unittest.TestCase):
         omd = omdict([(1, 'a'), (2, 'd')])
         
         # KeyError for non-existent key
-        with self.assertRaises(KeyError):
+        with self.assertRaises(KeyError) as cm:
             omd.replaceindex(99, 0, 'NEW')
+        self.assertIn('99', str(cm.exception))
+        self.assertIn('replaceindex', str(cm.exception))
+        self.assertIn('not found', str(cm.exception))
             
         # IndexError for out of bounds
-        with self.assertRaises(IndexError):
+        with self.assertRaises(IndexError) as cm:
             omd.replaceindex(1, 1, 'NEW')  # Only index 0 exists
+        self.assertIn('1', str(cm.exception))  # Index value
+        self.assertIn('replaceindex', str(cm.exception))
+        self.assertIn('out of range', str(cm.exception))
             
         # IndexError for negative out of bounds
-        with self.assertRaises(IndexError):
+        with self.assertRaises(IndexError) as cm:
             omd.replaceindex(1, -2, 'NEW')  # Only index 0 exists
+        self.assertIn('-2', str(cm.exception))  # Original negative index
+        self.assertIn('replaceindex', str(cm.exception))
+        self.assertIn('out of range', str(cm.exception))
             
         # Empty omdict
         omd = omdict()
-        with self.assertRaises(KeyError):
+        with self.assertRaises(KeyError) as cm:
             omd.replaceindex(1, 0, 'NEW')
+        self.assertIn('1', str(cm.exception))
+        self.assertIn('replaceindex', str(cm.exception))
+        self.assertIn('not found', str(cm.exception))
             
     def test_mixed_operations(self):
         """Test mixing removeindex and replaceindex with other operations."""

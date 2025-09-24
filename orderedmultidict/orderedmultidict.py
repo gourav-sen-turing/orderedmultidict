@@ -441,19 +441,25 @@ class omdict(MutableMapping):
         Returns: <self>.
         """
         if key not in self._map:
-            raise KeyError(key)
+            raise KeyError("removeindex(): key {!r} not found in omdict".format(key))
         
         values = self._map[key]
         if not values:
-            raise KeyError(key)
+            raise KeyError("removeindex(): key {!r} has no values in omdict".format(key))
+        
+        # Store original index for error reporting
+        original_index = index
         
         # Handle negative indices
         if index < 0:
             index = len(values) + index
         
-        # Check bounds
+        # Check bounds with descriptive error message
         if index < 0 or index >= len(values):
-            raise IndexError("list index out of range")
+            if len(values) == 1:
+                raise IndexError("removeindex(): index {} is out of range for key {!r} (only index 0 exists, {} total values)".format(original_index, key, len(values)))
+            else:
+                raise IndexError("removeindex(): index {} is out of range for key {!r} (valid range: 0 to {}, {} total values)".format(original_index, key, len(values)-1, len(values)))
         
         # Remove the node at the specified index
         node = values.pop(index)
@@ -489,19 +495,25 @@ class omdict(MutableMapping):
         Returns: <self>.
         """
         if key not in self._map:
-            raise KeyError(key)
+            raise KeyError("replaceindex(): key {!r} not found in omdict".format(key))
         
         values = self._map[key]
         if not values:
-            raise KeyError(key)
+            raise KeyError("replaceindex(): key {!r} has no values in omdict".format(key))
+        
+        # Store original index for error reporting
+        original_index = index
         
         # Handle negative indices
         if index < 0:
             index = len(values) + index
         
-        # Check bounds
+        # Check bounds with descriptive error message
         if index < 0 or index >= len(values):
-            raise IndexError("list index out of range")
+            if len(values) == 1:
+                raise IndexError("replaceindex(): index {} is out of range for key {!r} (only index 0 exists, {} total values)".format(original_index, key, len(values)))
+            else:
+                raise IndexError("replaceindex(): index {} is out of range for key {!r} (valid range: 0 to {}, {} total values)".format(original_index, key, len(values)-1, len(values)))
         
         # Replace the value in the node at the specified index
         node = values[index]
